@@ -1,10 +1,10 @@
 const express = require('express')
-const routerApi = require('./routes')
+const queries = require('./routes/queries')
 const app = express()
 const PORT = process.env.PORT || 3000
 
 app.use(express.json())
-routerApi(app)
+app.use(queries)
 
 app.listen(PORT, () => {
     console.log(`Server on port ${PORT}`)
