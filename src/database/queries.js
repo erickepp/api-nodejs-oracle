@@ -53,8 +53,25 @@ const eliminarTemporal = async () => {
     }
 }
 
+const eliminarModelo = async () => {
+    try {
+        const statements = (await fs.promises.readFile('src/database/sql/delete.sql', 'utf8')).split(';');
+        statements.pop();
+
+        for (let statement of statements) {
+            await conn.execute(statement);
+            await conn.commit();
+        }
+
+        return { message: 'Modelo eliminado con éxito' };
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 module.exports = {
     cargarTemporal,
     cargarModelo,
-    eliminarTemporal
+    eliminarTemporal,
+    eliminarModelo
 }
