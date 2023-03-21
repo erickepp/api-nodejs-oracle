@@ -9,6 +9,10 @@ const routerApi = (app) => {
         const result = await queries.cargarModelo();
         res.json(result);
     })
+    app.get('/eliminarTemporal',  async (req, res) => {
+        const result = await queries.eliminarTemporal();
+        res.json(result);
+    })
 }
 
 module.exports = routerApi

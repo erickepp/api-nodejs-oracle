@@ -16,7 +16,7 @@ const cargarTemporal = async () => {
         await conn.execute(model.pop());
         await exec('sqlldr erick/12345@xe control=src/database/load/control.ctl');
 
-        return { message: 'Carga a tabla temporal realizada con éxito'};
+        return { message: 'Carga a tabla temporal realizada con éxito' };
     } catch (err) {
         console.error(err);
     }
@@ -37,7 +37,17 @@ const cargarModelo = async () => {
             await conn.commit();
         }
 
-        return { message: 'Modelo cargado con éxito'};
+        return { message: 'Modelo cargado con éxito' };
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+const eliminarTemporal = async () => {
+    try {
+        await conn.execute('TRUNCATE TABLE temporal');
+        await conn.commit();
+        return { message: 'Datos eliminados de tabla temporal' };
     } catch (err) {
         console.error(err);
     }
@@ -45,5 +55,6 @@ const cargarModelo = async () => {
 
 module.exports = {
     cargarTemporal,
-    cargarModelo
+    cargarModelo,
+    eliminarTemporal
 }
