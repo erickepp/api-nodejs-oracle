@@ -1,6 +1,7 @@
 const dbConfig = require('./dbconfig');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
+const fs = require('fs');
 let conn;
 
 (async () => {
@@ -9,41 +10,40 @@ let conn;
 
 const cargarTemporal = async () => {
     try {
-        await conn.execute(`
-            CREATE TABLE temporal (
-                nombre_victima           VARCHAR2(50),
-                apellido_victima         VARCHAR2(50),
-                direccion_victima        VARCHAR2(100),
-                fecha_primera_sospecha   DATE,
-                fecha_confirmacion       DATE,
-                fecha_muerte             DATE,
-                estado_victima           VARCHAR2(50),
-                nombre_asociado          VARCHAR2(50),
-                apellido_asociado        VARCHAR2(50),
-                fecha_conocio            DATE,
-                contacto_fisico          VARCHAR2(100),
-                fecha_inicio_contacto    DATE,
-                fecha_fin_contacto       DATE,
-                nombre_hospital          VARCHAR2(100),
-                direccion_hospital       VARCHAR2(100),
-                ubicacion_victima        VARCHAR2(100),
-                fecha_llegada            DATE,
-                fecha_retiro             DATE,
-                tratamiento              VARCHAR2(100),
-                efectividad              INTEGER CHECK (efectividad BETWEEN 1 AND 10),
-                fecha_inicio_tratamiento DATE,
-                fecha_fin_tratamiento    DATE,
-                efectividad_en_victima   INTEGER CHECK (efectividad_en_victima BETWEEN 1 AND 10)
-            )
-        `);
-        
-        await exec('sqlldr erick/12345@xe control=src/database/carga/control.ctl');
+        const model = (await fs.promises.readFile('src/database/sql/model.sql', 'utf8')).split(';');
+        model.pop();
+
+        await conn.execute(model.pop());
+        await exec('sqlldr erick/12345@xe control=src/database/load/control.ctl');
+
         return { message: 'Carga a tabla temporal realizada con éxito'};
     } catch (err) {
         console.error(err);
     }
 }
 
+const cargarModelo = async () => {
+    try {
+        const model = (await fs.promises.readFile('src/database/sql/model.sql', 'utf8')).split(';');
+        model.splice(-2);
+        const inserts = (await fs.promises.readFile('src/database/sql/inserts.sql', 'utf8')).split(';');
+        inserts.pop();
+
+        for (let table of model) {
+            await conn.execute(table);
+        }
+        for (let insert of inserts) {
+            await conn.execute(insert);
+            await conn.commit();
+        }
+
+        return { message: 'Modelo cargado con éxito'};
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 module.exports = {
-    cargarTemporal
+    cargarTemporal,
+    cargarModelo
 }

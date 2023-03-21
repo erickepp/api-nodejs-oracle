@@ -1,7 +1,7 @@
 OPTIONS (SKIP=1)
 LOAD DATA
 CHARACTERSET UTF8
-INFILE 'src/database/carga/DB_Excel.csv'
+INFILE 'src/database/load/DB_Excel.csv'
 INTO TABLE temporal TRUNCATE
 FIELDS TERMINATED BY ';'
 TRAILING NULLCOLS (
